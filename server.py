@@ -3,6 +3,7 @@ import logging; log = logging.getLogger(__name__)
 from collections import namedtuple
 import json
 import os
+import secrets
 
 import tornado.ioloop
 import tornado.web
@@ -31,6 +32,8 @@ def parse_packet(ptype: str, rh: tornado.web.RequestHandler):
 	return ret
 
 def handle_packet(p: MSIMPacket):
+	# TODO: define some way to return HTTP code
+	from msim.models import Session, User
 	if p.ptype == 'HELLO':
 		return {
 			'highest-supported-layer': 1,
@@ -40,11 +43,23 @@ def handle_packet(p: MSIMPacket):
 			'supported-register-methods': ['REGISTER-PLAIN', 'REGISTER-INSTRUCTIONS'],
 		}
 	elif p.ptype == 'AUTH-PLAIN':
-		return {
-			'sessid': 'a0ac9ceec30b0bd05a498f927e96fa8e',
-		}
+		try:
+			user = User.objects.get(login=p.payload['login'], password_plaintext=p.payload['password'])  # TODO: base64
+			# TODO: make sure sessid doesn't exist
+			sessid = secrets.token_hex(32)
+			Session.objects.create(user=user, extid=sessid)
+			return {
+				'sessid': sessid,
+			}
+		except Exception:
+			return None
 	elif p.ptype == 'REGISTER-PLAIN':
-		return None
+		try:
+			assert len(User.objects.filter(login=p.payload['login'])) == 0
+			user = User.objects.create(login=p.payload['login'], password_plaintext=p.payload['password'])  # TODO: base64
+			return None
+		except Exception:
+			return None
 	elif p.ptype == 'REGISTER-INSTRUCTIONS':
 		return {
 			'text': 'Подайте заявление в бумажном виде',
