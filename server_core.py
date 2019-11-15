@@ -27,6 +27,15 @@ class MSIMPacket:
 	def __str__(self):
 		return str(self.__dict__)
 
+	def response(self, code, ptype=None, payload=None):
+		return MSIMPacket(
+			layer=self.layer,  # TODO: maybe we don't need this in server responses
+			ptype=ptype,
+			payload=payload,
+			code=code,
+			sessid=self.sessid,  # TODO: maybe we don't need this in server responses
+		)
+
 
 def _parse_packet(layer: int, ptype: str, payload: dict):
 	# TODO: validate payload against JSON schema
@@ -51,63 +60,34 @@ def parse_packet_from_tornado(layer: int, ptype: str, rh: tornado.web.RequestHan
 def handle_packet(p: MSIMPacket):
 	# TODO: define some way to return HTTP code
 	if p.ptype == 'HELLO':
-		return MSIMPacket(
-			layer=p.layer,
-			code=200,
-			payload={
-				'highest-supported-layer': 1,
-				'servername': 'dev.test',  # TODO
-				'federated': False,
-				'supported-auth-methods': ['AUTH-PLAIN'],
-				'supported-register-methods': ['REGISTER-PLAIN', 'REGISTER-INSTRUCTIONS'],
-			},
-			sessid=p.sessid,
-		)
+		return p.response(200, payload={
+			'highest-supported-layer': 1,
+			'servername': 'dev.test',  # TODO
+			'federated': False,
+			'supported-auth-methods': ['AUTH-PLAIN'],
+			'supported-register-methods': ['REGISTER-PLAIN', 'REGISTER-INSTRUCTIONS'],
+		})
 	elif p.ptype == 'AUTH-PLAIN':
 		try:
 			user = User.objects.get(login=p.payload['login'], password_plaintext=p.payload['password'])  # TODO: base64
 			# TODO: make sure sessid doesn't exist
 			sessid = secrets.token_hex(32)
 			Session.objects.create(user=user, extid=sessid)
-			return MSIMPacket(
-				layer=p.layer,
-				code=200,
-				payload={
-					'sessid': sessid,
-				},
-				sessid=p.sessid,
-			)
+			return p.response(200, payload={
+				'sessid': sessid,
+			})
 		except Exception:
-			return MSIMPacket(
-				layer=p.layer,
-				code=403,
-				sessid=p.sessid,
-			)
+			return p.response(403)
 	elif p.ptype == 'REGISTER-PLAIN':
-		try:
-			with transaction.atomic():
-				assert len(User.objects.filter(login=p.payload['login'])) == 0
-				user = User.objects.create(login=p.payload['login'], password_plaintext=p.payload['password'])  # TODO: base64
-				return MSIMPacket(
-					layer=p.layer,
-					code=200,
-					sessid=p.sessid,
-				)
-		except Exception:
-			return MSIMPacket(
-				layer=p.layer,
-				code=403,
-				sessid=p.sessid,
-			)
+		with transaction.atomic():
+			if User.objects.filter(login=p.payload['login']).exists():
+				return p.response(403)
+			user = User.objects.create(login=p.payload['login'], password_plaintext=p.payload['password'])  # TODO: base64
+			return p.response(200)
 	elif p.ptype == 'REGISTER-INSTRUCTIONS':
-		return MSIMPacket(
-			layer=p.layer,
-			code=200,
-			payload={
-				'text': 'Подайте заявление в бумажном виде',
-				'url': 'https://example.com/register',
-			},
-			sessid=p.sessid,
-		)
+		return p.response(200, payload={
+			'text': 'Подайте заявление в бумажном виде',
+			'url': 'https://example.com/register',
+		})
 	else:
 		raise ValueError(f'Unknown packet type: {p.ptype}')
