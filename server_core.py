@@ -4,12 +4,16 @@ import logging; log = logging.getLogger(__name__)
 import json
 import secrets
 
+from django.db import transaction
 import tornado.ioloop
 import tornado.web
 # from tornado.httputil import HTTPServerRequest
 
 
 class MSIMPacket:
+	# TODO: split constructors for ingress/egress
+	# TODO: validate
+	# TODO: response()
 	def __init__(self, layer=None, ptype=None, payload=None, code=None, sessid=None):
 		assert layer != None
 		assert code != None
@@ -20,25 +24,28 @@ class MSIMPacket:
 		self.code = code
 		self.sessid = sessid
 
+	def __str__(self):
+		return str(self.__dict__)
 
-def _parse_packet(ptype: str, payload: dict):
+
+def _parse_packet(layer: int, ptype: str, payload: dict):
 	# TODO: validate payload against JSON schema
 	ret = MSIMPacket(
-		layer=1,  # TODO
+		layer=layer,
 		code=0,
 		ptype=ptype,
-		sessid=None, # TODO
+		sessid=None,  # TODO
 		payload=payload,
 	)
 	log.warning(ret)
 	return ret
 
 
-def parse_packet_from_tornado(ptype: str, rh: tornado.web.RequestHandler):
+def parse_packet_from_tornado(layer: int, ptype: str, rh: tornado.web.RequestHandler):
 	payload = None
 	if len(rh.request.body) > 0:
 		payload = json.loads(rh.request.body)
-	return _parse_packet(ptype, payload)
+	return _parse_packet(layer, ptype, payload)
 
 
 def handle_packet(p: MSIMPacket):
@@ -78,13 +85,14 @@ def handle_packet(p: MSIMPacket):
 			)
 	elif p.ptype == 'REGISTER-PLAIN':
 		try:
-			assert len(User.objects.filter(login=p.payload['login'])) == 0
-			user = User.objects.create(login=p.payload['login'], password_plaintext=p.payload['password'])  # TODO: base64
-			return MSIMPacket(
-				layer=p.layer,
-				code=200,
-				sessid=p.sessid,
-			)
+			with transaction.atomic():
+				assert len(User.objects.filter(login=p.payload['login'])) == 0
+				user = User.objects.create(login=p.payload['login'], password_plaintext=p.payload['password'])  # TODO: base64
+				return MSIMPacket(
+					layer=p.layer,
+					code=200,
+					sessid=p.sessid,
+				)
 		except Exception:
 			return MSIMPacket(
 				layer=p.layer,
