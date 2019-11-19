@@ -6,4 +6,4 @@ docker:
 	docker build -t 'm1kc/msimexper' .
 
 dockerrun:
-	docker run -p 3218:3218 m1kc/msimexper
+	docker run -ti -p 3218:3218 m1kc/msimexper

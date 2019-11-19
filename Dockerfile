@@ -18,13 +18,11 @@ COPY pyproject.toml ./
 COPY poetry.lock ./
 RUN poetry install
 
-CMD ["python", "/usr/django/app/server.py"]
+CMD python /usr/django/app/manage.py migrate && python /usr/django/app/server.py
 
 ENV DJANGO_SETTINGS_MODULE msimexper.settings
 ENV DJANGO_APP=msimexper
 
 ENV GUNICORN_CMD_ARGS "-t 120 -w4"
-
-ENV DJANGO_MANAGEMENT_ON_START "migrate"
 
 COPY . /usr/django/app
