@@ -11,6 +11,7 @@ import django
 import django.conf
 
 PORT = 3218
+DEBUG = True
 
 
 class IndexHandler(tornado.web.RequestHandler):
@@ -20,7 +21,7 @@ class IndexHandler(tornado.web.RequestHandler):
 
 class EverythingHandler(tornado.web.RequestHandler):
 	def post(self, layer, ptype):
-		from server_core import parse_packet_from_tornado, handle_packet
+		from core.server_core import parse_packet_from_tornado, handle_packet
 		req = parse_packet_from_tornado(int(layer), ptype, self)
 		res = handle_packet(req)
 		self.set_status(res.code)
@@ -32,7 +33,7 @@ def make_app():
 	return tornado.web.Application([
 		(r"/", IndexHandler),
 		(r"/v(\d+)/(\S+)", EverythingHandler),
-	], debug=True)
+	], debug=DEBUG)
 
 
 if __name__ == "__main__":
