@@ -7,17 +7,39 @@ import secrets
 from django.db import transaction
 
 
-def register_all(h):
+SERVERNAME = 'localhost'
+
+
+def register_all(h, s):
 	h['HELLO'] = handle_hello
+
 	h['AUTH-PLAIN'] = handle_auth_plain
+	s['AUTH-PLAIN'] = {
+		'type': 'object',
+		'properties': {
+			'login': { 'type': 'string' },
+			'password': { 'type': 'string' },
+		},
+		'required': ['login', 'password'],
+	}
+
 	h['REGISTER-PLAIN'] = handle_register_plain
+	s['REGISTER-PLAIN'] = {
+		'type': 'object',
+		'properties': {
+			'login': { 'type': 'string' },
+			'password': { 'type': 'string' },
+		},
+		'required': ['login', 'password'],
+	}
+
 	h['REGISTER-INSTRUCTIONS'] = handle_register_instructions
 
 
 def handle_hello(p: MSIMPacket):
 	return p.response(200, payload={
 		'highest-supported-layer': 1,
-		'servername': 'dev.test',  # TODO
+		'servername': SERVERNAME,
 		'federated': False,
 		'supported-auth-methods': ['AUTH-PLAIN'],
 		'supported-register-methods': ['REGISTER-PLAIN', 'REGISTER-INSTRUCTIONS'],
