@@ -3,6 +3,7 @@ from msim.models import Session, User
 
 import logging; log = logging.getLogger(__name__)
 import secrets
+import base64
 
 from django.db import transaction
 
@@ -48,7 +49,10 @@ def handle_hello(p: MSIMPacket):
 
 def handle_auth_plain(p: MSIMPacket):
 	try:
-		user = User.objects.get(login=p.payload['login'], password_plaintext=p.payload['password'])  # TODO: base64
+		user = User.objects.get(
+			login=p.payload['login'],
+			password_plaintext=base64.b64decode(p.payload['password']).decode('utf-8'),
+		)
 		# TODO: make sure sessid doesn't exist
 		sessid = secrets.token_hex(32)
 		Session.objects.create(user=user, extid=sessid)
@@ -63,7 +67,10 @@ def handle_register_plain(p: MSIMPacket):
 	with transaction.atomic():
 		if User.objects.filter(login=p.payload['login']).exists():
 			return p.response(403)
-		User.objects.create(login=p.payload['login'], password_plaintext=p.payload['password'])  # TODO: base64
+		User.objects.create(
+			login=p.payload['login'],
+			password_plaintext=base64.b64decode(p.payload['password']).decode('utf-8'),
+		)
 		return p.response(200)
 
 
