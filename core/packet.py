@@ -1,6 +1,5 @@
 class MSIMPacket:
 	# TODO: split constructors for ingress/egress
-	# TODO: validate
 	def __init__(self, layer=None, ptype=None, payload=None, code=None, sessid=None):
 		assert layer != None
 		assert code != None

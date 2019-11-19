@@ -15,6 +15,8 @@ HANDLERS = {}
 SCHEMAS = {}
 auth_layer1.register_all(HANDLERS, SCHEMAS)
 
+LOG_ALL = True
+
 
 def _parse_packet(layer: int, ptype: str, payload: dict):
 	ret = MSIMPacket(
@@ -24,7 +26,7 @@ def _parse_packet(layer: int, ptype: str, payload: dict):
 		sessid=None,  # TODO
 		payload=payload,
 	)
-	log.warning(ret)
+	if LOG_ALL: log.warning(ret)
 	return ret
 
 
