@@ -1,4 +1,16 @@
 class MSIMPacket:
+	layer: int = None  # Protocol layer specified by packet originator
+	ptype: str = None  # Packet type
+	payload: dict = None  # Packet body (if any)
+	sessid: str = None  # Session ID (if any)
+	code: int = None  # Response code (for server responses)
+
+	user: object = None  # User instance (if sessid was specified and it's valid)
+
+	# @classmethod
+	# def ingress(cls, layer, ptype, payload=None, sessid=None):
+	# 	return cls()
+
 	# TODO: split constructors for ingress/egress
 	def __init__(self, layer=None, ptype=None, payload=None, code=None, sessid=None):
 		assert layer != None
