@@ -11,7 +11,8 @@ import django
 import django.conf
 
 PORT = 3218
-DEBUG = True
+DEBUG = False
+AUTORELOAD = True
 
 
 class IndexHandler(tornado.web.RequestHandler):
@@ -33,7 +34,7 @@ def make_app():
 	return tornado.web.Application([
 		(r"/", IndexHandler),
 		(r"/v(\d+)/(\S+)", EverythingHandler),
-	], debug=DEBUG)
+	], debug=DEBUG, autoreload=AUTORELOAD)
 
 
 if __name__ == "__main__":
