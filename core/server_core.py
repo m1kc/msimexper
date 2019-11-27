@@ -1,5 +1,5 @@
 from .packet import MSIMPacket
-from core import auth_layer1
+from core import auth_layer1, contact_layer2
 
 import logging; log = logging.getLogger(__name__)
 import json
@@ -14,6 +14,7 @@ from jsonschema.exceptions import ValidationError
 HANDLERS = {}
 SCHEMAS = {}
 auth_layer1.register_all(HANDLERS, SCHEMAS)
+contact_layer2.register_all(HANDLERS, SCHEMAS)
 
 LOG_ALL = True
 
