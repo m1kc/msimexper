@@ -12,3 +12,9 @@ class User(models.Model):
 class Session(models.Model):
 	extid = models.TextField()
 	user = models.ForeignKey(User, on_delete=models.PROTECT)
+
+
+class Contact(models.Model):
+	user = models.ForeignKey(User, on_delete=models.PROTECT)
+	contact_mid = models.TextField()
+	group_path_json = models.TextField()
