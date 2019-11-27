@@ -19,12 +19,12 @@ contact_layer2.register_all(HANDLERS, SCHEMAS)
 LOG_ALL = True
 
 
-def _parse_packet(layer: int, ptype: str, payload: dict):
+def _parse_packet(layer: int, ptype: str, payload: dict, sessid: str):
 	ret = MSIMPacket(
 		layer=layer,
 		code=0,
 		ptype=ptype,
-		sessid=None,  # TODO
+		sessid=sessid,
 		payload=payload,
 	)
 	if LOG_ALL: log.warning(ret)
@@ -35,7 +35,12 @@ def parse_packet_from_tornado(layer: int, ptype: str, rh: tornado.web.RequestHan
 	payload = None
 	if len(rh.request.body) > 0:
 		payload = json.loads(rh.request.body)
-	return _parse_packet(layer, ptype, payload)
+
+	sessid = None
+	if 'X-Session' in rh.request.headers:
+		sessid = rh.request.headers['X-Session']
+
+	return _parse_packet(layer, ptype, payload, sessid)
 
 
 def handle_packet(p: MSIMPacket):
