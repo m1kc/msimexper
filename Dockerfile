@@ -23,6 +23,4 @@ CMD python /usr/django/app/manage.py migrate && python /usr/django/app/server.py
 ENV DJANGO_SETTINGS_MODULE msimexper.settings
 ENV DJANGO_APP=msimexper
 
-ENV GUNICORN_CMD_ARGS "-t 120 -w4"
-
 COPY . /usr/django/app
