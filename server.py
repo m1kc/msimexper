@@ -22,9 +22,9 @@ class IndexHandler(tornado.web.RequestHandler):
 
 class EverythingHandler(tornado.web.RequestHandler):
 	def post(self, layer, ptype):
-		from core.server_core import parse_packet_from_tornado, handle_packet
-		req = parse_packet_from_tornado(int(layer), ptype, self)
-		res = handle_packet(req)
+		from core.server_core import parse_request_from_tornado, handle_request
+		req = parse_request_from_tornado(int(layer), ptype, self)
+		res = handle_request(req)
 		self.set_status(res.code)
 		if res.payload != None:
 			self.write(json.dumps(res.payload, ensure_ascii=False))

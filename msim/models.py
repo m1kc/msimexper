@@ -18,4 +18,5 @@ class Contact(models.Model):
 	user = models.ForeignKey(User, on_delete=models.PROTECT)
 	handle = models.TextField()
 	servername = models.TextField()
+	caption = models.TextField()
 	group_path_json = models.TextField()

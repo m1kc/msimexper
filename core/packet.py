@@ -1,35 +1,47 @@
-class MSIMPacket:
-	layer: int = None  # Protocol layer specified by packet originator
+import logging; log = logging.getLogger(__name__)
+
+
+class MSIMRequest:
+	layer: int = None  # Protocol layer as specified by packet originator
 	ptype: str = None  # Packet type
 	payload: dict = None  # Packet body (if any)
 	sessid: str = None  # Session ID (if any)
-	code: int = None  # Response code (for server responses)
 
-	user: object = None  # User instance (if sessid was specified and it's valid)
+	user: object = None  # User instance associated with this request (if any)
 
-	# @classmethod
-	# def ingress(cls, layer, ptype, payload=None, sessid=None):
-	# 	return cls()
-
-	# TODO: split constructors for ingress/egress
-	def __init__(self, layer=None, ptype=None, payload=None, code=None, sessid=None):
-		assert layer != None
-		assert code != None
-
+	def __init__(self, layer, ptype, payload=None, sessid=None, user=None):
 		self.layer = layer
 		self.ptype = ptype
 		self.payload = payload
-		self.code = code
 		self.sessid = sessid
-
-	def __str__(self):
-		return str(self.__dict__)
+		self.user = user
+		log.warning(f'MSIM request: {self.__dict__}')
 
 	def response(self, code, ptype=None, payload=None):
-		return MSIMPacket(
-			layer=self.layer,  # TODO: maybe we don't need this in server responses
+		return MSIMResponse(
+			code=code,
 			ptype=ptype,
 			payload=payload,
-			code=code,
-			sessid=self.sessid,  # TODO: maybe we don't need this in server responses
+
+			_layer=self.layer,
+			_sessid=self.sessid,
+			_user=self.user,
 		)
+
+
+class MSIMResponse:
+	code: int = None  # Response code
+	ptype: str = None  # Packet type (if any)
+	payload: dict = None  # Packet body (if any)
+
+	_layer: int = None
+	_sessid: str = None
+	_user: object = None
+
+	def __init__(self, code, *, ptype=None, payload=None, _layer=None, _sessid=None, _user=None):
+		self.code = code
+		self.ptype = ptype
+		self.payload = payload
+		self._layer = _layer
+		self._sessid = _sessid
+		self._user = _user
