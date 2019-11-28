@@ -16,5 +16,6 @@ class Session(models.Model):
 
 class Contact(models.Model):
 	user = models.ForeignKey(User, on_delete=models.PROTECT)
-	contact_mid = models.TextField()
+	handle = models.TextField()
+	servername = models.TextField()
 	group_path_json = models.TextField()
