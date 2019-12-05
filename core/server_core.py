@@ -45,6 +45,7 @@ def parse_request_from_tornado(layer: int, ptype: str, rh: tornado.web.RequestHa
 
 def handle_request(p: MSIMRequest):
 	# Validate payload, if any
+	# TODO: handle case if no payload but it's required
 	if p.payload != None:
 		if p.ptype in SCHEMAS:
 			try:
