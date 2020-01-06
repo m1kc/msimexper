@@ -43,6 +43,18 @@ def parse_request_from_tornado(layer: int, ptype: str, rh: tornado.web.RequestHa
 	return make_request(layer, ptype, payload, sessid)
 
 
+def parse_request_django(layer: int, ptype: str, request):
+	payload = None
+	if len(request.body) > 0:
+		payload = json.loads(request.body)
+
+	sessid = None
+	if 'X-Session' in request.headers:
+		sessid = request.headers['X-Session']
+
+	return make_request(layer, ptype, payload, sessid)
+
+
 def handle_request(p: MSIMRequest):
 	# Validate payload, if any
 	# TODO: handle case if no payload but it's required
