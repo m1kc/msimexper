@@ -2,4 +2,5 @@
 set -e
 set -x
 
-poetry run python manage.py runserver 0.0.0.0:3218
+#poetry run python manage.py runserver 0.0.0.0:3218
+uvicorn --port 3218 msimexper.asgi:application

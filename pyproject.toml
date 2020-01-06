@@ -6,10 +6,12 @@ authors = ["m1kc (Max Musatov) <m1kc@yandex.ru>"]
 
 [tool.poetry.dependencies]
 python = "^3.6"
-django = "^2.2"
 tornado = "^6.0"
 arrow = "^0.15.4"
 jsonschema = "^3.2"
+channels = "^2.4.0"
+Django = "^3.0.2"
+uvicorn = "^0.11.1"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.7"
