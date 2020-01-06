@@ -1,0 +1,10 @@
+#!/bin/bash
+set -e
+set -x
+
+script/bootstrap
+
+if [ -e db.sqlite3 ]; then
+        mv db.sqlite3 db.sqlite3~
+fi
+poetry run python manage.py migrate

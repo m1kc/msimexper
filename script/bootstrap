@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e
+set -x
+
+which python3 || which python
+#which virtualenv
+which poetry
+
+poetry install

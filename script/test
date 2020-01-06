@@ -1,0 +1,6 @@
+#!/bin/bash
+set -e
+set -x
+
+echo "This project has no test suite."
+#poetry run pytest
