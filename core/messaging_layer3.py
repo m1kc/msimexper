@@ -44,12 +44,14 @@ def handle_chats_get(p: MSIMRequest):
 	)
 	ret = []
 	for ref in src:
-		num_unread = PrivateChatMessage.objects.filter(chat=ref.chat).filter(pk__gt=ref.last_read_msg_id).count()
-
 		last_message_id = None
 		last_message = PrivateChatMessage.objects.filter(chat=ref.chat).order_by('-id')[:1]
 		if len(last_message) > 0:
 			last_message_id = last_message[0].pk
+
+		num_unread = 0
+		if ref.last_read_msg_id != None:
+			num_unread = PrivateChatMessage.objects.filter(chat=ref.chat).filter(pk__gt=ref.last_read_msg_id).count()
 
 		ret.append({
 			"id": ref.chat_mid,
