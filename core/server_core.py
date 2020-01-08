@@ -1,5 +1,5 @@
 from .packet import MSIMRequest
-from core import auth_layer1, contact_layer2
+from core import auth_layer1, contact_layer2, messaging_layer3
 from msim.models import Session
 
 import logging; log = logging.getLogger(__name__)
@@ -16,6 +16,7 @@ HANDLERS = {}
 SCHEMAS = {}
 auth_layer1.register_all(HANDLERS, SCHEMAS)
 contact_layer2.register_all(HANDLERS, SCHEMAS)
+messaging_layer3.register_all(HANDLERS, SCHEMAS)
 
 LOG_ALL = True
 
