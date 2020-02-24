@@ -49,7 +49,13 @@ class LongPollConsumer(AsyncHttpConsumer):
 				# 	(b"Content-Type", b"text/plain"),
 				# ])
 				# ignores p.code?
-				await self.send_response(200, json.dumps(p.payload, ensure_ascii=False).encode('utf-8'))
+				await self.send_response(
+					200,
+					json.dumps(p.payload, ensure_ascii=False).encode('utf-8'),
+					headers=[
+						(b'X-Type', p.ptype.encode('utf-8'))
+					]
+				)
 			except asyncio.TimeoutError:
 				await self.send_response(204, b'')
 		except Exception as ex:
