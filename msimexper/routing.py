@@ -18,17 +18,26 @@ class LongPollConsumer(AsyncHttpConsumer):
 			log.debug('started /fetch')
 			log.debug(self.scope['headers'])
 
+			# Extract sessid from request headers
 			sessid = None
 			for key, value in self.scope['headers']:
+				# TODO: fuck this shit, make proper headers object that ignores case
+				# (probably someone wrote it already)
 				if key.decode('utf-8') == 'x-session':
 					sessid = value.decode('utf-8')
 			log.debug(sessid)
 			assert sessid != None, "No X-Session header"
 
+			# Authenticate user
 			#user = auth(sessid)
 			user = await database_sync_to_async(auth)(sessid)
 			log.debug(user)
 			assert user != None, "Auth failed"
+
+			# TODO: Get message queue for this sessid
+			# TODO: if it was just created, return code 201
+			# TODO: if message is available immediately, return it
+			# TODO: or wait for queue to become non-empty
 
 			await asyncio.sleep(10)
 			await self.send_response(200, b"Your response bytes", headers=[
