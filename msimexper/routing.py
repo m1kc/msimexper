@@ -1,4 +1,5 @@
 from core.server_core import auth
+from core.fanout import queue_create, queue_pop
 
 import asyncio
 import logging; log = logging.getLogger(__name__)
@@ -34,15 +35,21 @@ class LongPollConsumer(AsyncHttpConsumer):
 			log.debug(user)
 			assert user != None, "Auth failed"
 
-			# TODO: Get message queue for this sessid
-			# TODO: if it was just created, return code 201
-			# TODO: if message is available immediately, return it
-			# TODO: or wait for queue to become non-empty
-
-			await asyncio.sleep(10)
-			await self.send_response(200, b"Your response bytes", headers=[
-				(b"Content-Type", b"text/plain"),
-			])
+			# Get message queue for this sessid. If it was just created, return code 201
+			just_created = await queue_create(sessid)
+			if just_created:
+				await self.send_response(201, b'')
+				return
+			# Return a message from queue, possibly waiting for it to appear
+			try:
+				msg = await queue_pop(sessid)
+				# await asyncio.sleep(10)
+				# await self.send_response(200, b"Your response bytes", headers=[
+				# 	(b"Content-Type", b"text/plain"),
+				# ])
+				await self.send_response(200, msg.encode('utf-8'))
+			except asyncio.TimeoutError:
+				await self.send_response(204, b'')
 		except Exception as ex:
 			log.error('LongPollConsumer.handle: %s', ex)
 
