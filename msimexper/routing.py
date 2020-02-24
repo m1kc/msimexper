@@ -3,6 +3,7 @@ from core.fanout import queue_create, queue_pop
 
 import asyncio
 import logging; log = logging.getLogger(__name__)
+import json
 
 from django.conf.urls import url
 from channels.routing import ProtocolTypeRouter, URLRouter
@@ -42,12 +43,13 @@ class LongPollConsumer(AsyncHttpConsumer):
 				return
 			# Return a message from queue, possibly waiting for it to appear
 			try:
-				msg = await queue_pop(sessid)
+				p = await queue_pop(sessid)
 				# await asyncio.sleep(10)
 				# await self.send_response(200, b"Your response bytes", headers=[
 				# 	(b"Content-Type", b"text/plain"),
 				# ])
-				await self.send_response(200, msg.encode('utf-8'))
+				# ignores p.code?
+				await self.send_response(200, json.dumps(p.payload, ensure_ascii=False).encode('utf-8'))
 			except asyncio.TimeoutError:
 				await self.send_response(204, b'')
 		except Exception as ex:

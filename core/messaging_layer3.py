@@ -1,5 +1,6 @@
-from .packet import MSIMRequest
+from .packet import MSIMRequest, MSIMResponse
 from msim.models import User, Contact, PrivateChat, PrivateChatReference, PrivateChatMessage
+from core.fanout import queue_push_to_user
 
 import logging; log = logging.getLogger(__name__)
 import secrets
@@ -7,6 +8,7 @@ import base64
 import json
 
 from django.db import transaction
+from asgiref.sync import async_to_sync
 
 
 SERVERNAME = 'localhost'
@@ -90,6 +92,11 @@ def _get_or_create_chat(user, chat_mid):
 	return chat
 
 
+def _parse_mid(x):
+	handle, servername = x.split('@')
+	return handle, servername
+
+
 def handle_message_send(p: MSIMRequest):
 	assert p.user != None  # TODO: return proper code
 
@@ -103,13 +110,34 @@ def handle_message_send(p: MSIMRequest):
 	if len(existing_msg) > 0:
 		return p.response(500)  # TODO: return proper code and message id
 
+	author_mid = f'{p.user.login}@{SERVERNAME}'
 	msg = PrivateChatMessage.objects.create(
 		chat=chat,
 		prev_msg_id=_last_message_id(chat.pk),
 		cookie=cookie,
-		author_mid=f'{p.user.login}@{SERVERNAME}',
+		author_mid=author_mid,
 		text=text,
 	)
+
+	try:
+		handle, servername = _parse_mid(chat_id)
+		async_to_sync(queue_push_to_user)(handle, MSIMResponse(
+			200,
+			ptype='MESSAGE-RECEIVE',
+			payload={
+				'message_id': msg.pk,
+				#'previous_message_id': uint64
+				'cookie': None,
+				'time': str(msg.created),
+				'chat_id': author_mid,
+				'from': author_mid,
+				'text': msg.text,
+			},
+		))
+	except Exception as ex:
+		import traceback
+		traceback.print_exc()
+
 	return p.response(200, {
 		"cookie": cookie,
 		"message_id": msg.pk,
