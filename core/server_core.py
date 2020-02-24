@@ -1,6 +1,6 @@
 from .packet import MSIMRequest
 from core import auth_layer1, contact_layer2, messaging_layer3
-from msim.models import Session
+from msim.models import Session, User
 
 import logging; log = logging.getLogger(__name__)
 import json
@@ -21,11 +21,16 @@ messaging_layer3.register_all(HANDLERS, SCHEMAS)
 LOG_ALL = True
 
 
-def make_request(layer, ptype, payload, sessid):
+def auth(sessid: str) -> User:
 	user = None
 	if sessid != None:
 		session = Session.objects.get(extid=sessid)
 		user = session.user
+	return user
+
+
+def make_request(layer, ptype, payload, sessid):
+	user = auth(sessid)
 
 	# TODO: validate here instead of handle_ ?
 
