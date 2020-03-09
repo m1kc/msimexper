@@ -12,6 +12,9 @@ POP_TIMEOUT = 15
 _queues = {}
 
 
+# TODO: thread safety: all functions must acquire lock before mutating _queues
+
+
 async def queue_create(sessid: str) -> bool:
 	"""
 	Returns True on successful create, False if it already exists.
