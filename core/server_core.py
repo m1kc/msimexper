@@ -5,9 +5,9 @@ from msim.models import Session, User
 import logging; log = logging.getLogger(__name__)
 import json
 
-import tornado.ioloop
-import tornado.web
-# from tornado.httputil import HTTPServerRequest
+#import tornado.ioloop
+#import tornado.web
+## from tornado.httputil import HTTPServerRequest
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 
@@ -37,16 +37,16 @@ def make_request(layer, ptype, payload, sessid):
 	return MSIMRequest(layer, ptype, payload, sessid, user)
 
 
-def parse_request_from_tornado(layer: int, ptype: str, rh: tornado.web.RequestHandler):
-	payload = None
-	if len(rh.request.body) > 0:
-		payload = json.loads(rh.request.body)
-
-	sessid = None
-	if 'X-Session' in rh.request.headers:
-		sessid = rh.request.headers['X-Session']
-
-	return make_request(layer, ptype, payload, sessid)
+#def parse_request_from_tornado(layer: int, ptype: str, rh: tornado.web.RequestHandler):
+#	payload = None
+#	if len(rh.request.body) > 0:
+#		payload = json.loads(rh.request.body)
+#
+#	sessid = None
+#	if 'X-Session' in rh.request.headers:
+#		sessid = rh.request.headers['X-Session']
+#
+#	return make_request(layer, ptype, payload, sessid)
 
 
 def parse_request_django(layer: int, ptype: str, request):
