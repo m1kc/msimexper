@@ -15,7 +15,7 @@ RUN poetry config virtualenvs.create false
 
 COPY pyproject.toml ./
 COPY poetry.lock ./
-RUN poetry install
+RUN poetry install --no-dev
 
 ENV DJANGO_SETTINGS_MODULE msimexper.settings
 ENV DJANGO_APP=msimexper
