@@ -20,6 +20,8 @@ RUN poetry install --no-dev
 ENV DJANGO_SETTINGS_MODULE msimexper.settings
 ENV DJANGO_APP=msimexper
 
+ENV GUNICORN_CMD_ARGS "-k uvicorn.workers.UvicornWorker"
+
 ENV DJANGO_MANAGEMENT_ON_START "migrate"
 
 COPY . /usr/django/app
