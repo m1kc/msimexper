@@ -9,7 +9,7 @@ python = "^3.9.2"
 arrow = "^0.15.4"
 jsonschema = "^3.2"
 channels = "^2.4.0"
-Django = "^3.0.2"
+Django = "^3.2.25"
 uvicorn = {version = "^0.14.0", extras = ["standard"]}
 ipython = "^7.13.0"
 
